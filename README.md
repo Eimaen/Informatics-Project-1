@@ -33,8 +33,8 @@
 ```C++
 ofstream fout("output.xls");
 
-TableRenderer renderer({ "Russian is not allowed", "Or is allowed, but I don't know how to encode" });
+TableRenderer renderer();
 renderer.addRow({ "TEST 1", "TEST 2" });
 renderer.addRow({ "TEST 3", "TEST 4" });
-renderer.write(fout);
+renderer.write(fout); // Потом конвертировать вручную в UTF-8, если есть русские символы
 ```
