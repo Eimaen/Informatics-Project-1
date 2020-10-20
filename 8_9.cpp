@@ -11,7 +11,7 @@ string text;
 ifstream fin("input.txt");
 ifstream fout("output.txt");
 
-// Split string by words (divided by "divider")
+// Split string by words (separated by "divider")
 vector<string> split(string s, string divider)
 {
     vector<string> ret;
@@ -54,10 +54,9 @@ enum letter_type {
 // Get type of a given symbol
 int getCharType(char c)
 {
-    // абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ
     string vowel = "аоуыэяёюиеАОУЫЭЯЁЮИЕ";
     string consonant = "бвгджзйклмнпрстфхцчшщБВГДЖЗЙКЛМНПРСТФХЦЧШЩ";
-    string symblos = ":,.- ъЪьЬ";
+    string symblos = ":,.-ъЪьЬ";
     if (vowel.find(c) != string::npos)
         return CHAR_VOWEL;
     else if (consonant.find(c) != string::npos)
@@ -74,9 +73,9 @@ vector<pair<string, string>> analyseWordLetters(vector<string> ss)
     vector<pair<string, string>> ret;
     for (int i = 0; i < ss.size() - 1; i++)
     {
-        int firstWordLength = ss[i].length(), secondWordLength = ss[i + 1].length();
-        if (firstWordLength < 2 && secondWordLength < 2)
-            continue;
+        int firstWordLength = ss[i].length(), secondWordLength = ss[i + 1].length(); // Get word lengths
+        if (firstWordLength < 2 || secondWordLength < 2 || firstWordLength < 1 || secondWordLength < 1)
+            continue; // If length is 1 or less, we couldn't get ss[i][length - 2] element, so, we don't need theese words
         bool wordOk1 = getCharType(ss[i][firstWordLength - 1]) == CHAR_VOWEL && getCharType(ss[i][firstWordLength - 1]) == CHAR_VOWEL;
         bool wordOk2 = getCharType(ss[i + 1][0]) == CHAR_CONSONANT && getCharType(ss[i + 1][1]) == CHAR_CONSONANT;
         if (wordOk1 && wordOk2)
@@ -85,11 +84,14 @@ vector<pair<string, string>> analyseWordLetters(vector<string> ss)
     return ret;
 }
 
+// Application's entry point
 int main()
 {
-    setlocale(LC_ALL, "Russian");
-    getline(fin, text);
+    // Set output codepage to Russian and read the text
+    setlocale(LC_ALL, "Russian"); 
+    getline(fin, text); 
 
+    // Split the text using spaces as separators
     vector<string> ss = split(text, " ");
 
     cout << "Word ending analysis statistics: \n";
@@ -102,7 +104,7 @@ int main()
     else
         cout << "No words matched pattern!\n";
 
-    // Divide results
+    // Separate results
     cout << "\nWord appearance statistics: \n";
 
     // Count word repeats
