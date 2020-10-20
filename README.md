@@ -30,7 +30,7 @@
 В конце работы нужно будет предоставить данные ввиде *Excel-таблицы*, но, так как заносить все данные в таблицу очень долго и скучно, я развлёк себя написанием [класса для создания *Excel-таблиц*](https://github.com/Eimaen/Informatics-Project-1/blob/main/TableRenderer.h).
 
 Пример использования `TableRenderer`:
-```
+```C++
 ofstream fout("output.xls");
 
 TableRenderer renderer({ "Russian is not allowed", "Or is allowed, but I don't know how to encode" });
