@@ -1,0 +1,85 @@
+#include <fstream>
+#include <string>
+#include <windows.h>
+#include <iomanip>
+
+using namespace std;
+using namespace std::__cxx11;
+
+int main()
+{
+    string prep = ".,-!?:;—()[]" + (char)22 + (char)27;
+    string gl = "уеыаоэяиюё";
+    string sogl = "бвгджзйклмнпрстфхцчшщ";
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    ifstream fin("input.txt");
+    ofstream fout("output.txt");
+    fout << setprecision(4) << fixed << endl;
+    string s = "";
+    while(!fin.eof()){
+        string st;
+        getline(fin, st);
+        s += st + " ";
+    }
+
+    for(int i = 0; i < s.length();)
+        if(prep.find(s[i]) != string::npos)
+            s.erase(i, 1);
+        else
+            i++;
+
+    int l = s.length();
+    int words = 0;
+    int cher = 0;
+    int gg = 0, ss = 0, gs = 0, sg = 0;
+    int triple = 0;
+
+    while(!s.empty()){
+        words++;
+        int spacePos = s.find(spacePos);
+        string slovo = s.substr(0, spacePos);
+        s.erase(0, spacePos + 1);
+        int sl = slovo.length();
+        while(s[0] == ' ')
+            s.erase(0, 1);
+
+        for(int i = 0; i < slovo.length() - 1; i++){
+            bool cgl = gl.find(slovo[i]) != string::npos;
+            bool c1gl = gl.find(slovo[i + 1]) != string::npos;
+            bool csogl = sogl.find(slovo[i]) != string::npos;
+            bool c1sogl = sogl.find(slovo[i + 1]) != string::npos;
+            if((cgl && c1sogl) || (c1gl && csogl))
+                cher++;
+        }
+
+        if(sogl.find(slovo[0]) != string::npos){
+            if(sogl.find(slovo[sl - 1]) != string::npos)
+                ss++;
+            else if(gl.find(slovo[sl - 1]) != string::npos)
+                sg++;
+        }
+        else
+        {
+            if(sogl.find(slovo[sl - 1]) != string::npos)
+                gs++;
+            else if(gl.find(slovo[sl - 1]) != string::npos)
+                gg++;
+        }
+
+        for(int i = 1; i < s.length() - 1; i++){
+            bool gl1 = gl.find(slovo[i - 1]) != string::npos;
+            bool gl2 = gl.find(slovo[i]) != string::npos;
+            bool gl3 = gl.find(slovo[i + 1]) != string::npos;
+            if(gl1 == gl2 && gl2 == gl3)
+                triple++;
+        }
+    }
+
+    fout << "Чередование букв: " << 100.0 * cher / l << "%" << endl;
+    fout << "ГГ: " << 100.0 * gg / words << endl << "ГС" << 100.0 * gs / words << endl;
+    fout << "СГ: " << 100.0 * sg / words << endl << "СС" << 100.0 * ss / words << endl;
+    fout << "Тройное повторение: " << triple << endl;
+
+    return 0;
+}
