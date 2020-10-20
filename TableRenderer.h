@@ -4,7 +4,7 @@ public:
     void addRow(vector<string> row);
     string render();
     void write(ostream& stream);
-    TableRenderer(vector<string> headers);
+    TableRenderer();
     ~TableRenderer();
 
 private:
@@ -16,13 +16,8 @@ private:
 // Add row to the table
 void TableRenderer::addRow(vector<string> row)
 {
-    if (row.size() != _szTable)
-        throw "row size mismatch: has to be " + _szTable;
-    else
-    {
-        _table.push_back(row);
-        _szRowCount++;
-    }
+    _table.push_back(row);
+    _szRowCount++;
 }
 
 // New versions of Excel warns, that this format is unsafe
@@ -58,14 +53,14 @@ string TableRenderer::render()
 // Write contents to stream
 void TableRenderer::write(ostream& stream)
 {
+    // Russian is only supported when using UTF-8, convert it
+    // manually with Notepad++ or any other tool
     stream << render();
 }
 
-TableRenderer::TableRenderer(vector<string> headers)
+TableRenderer::TableRenderer()
 {
     _szRowCount = 0;
-    _szTable = headers.size();
-    addRow(headers);
 }
 
 TableRenderer::~TableRenderer()
