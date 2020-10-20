@@ -25,3 +25,16 @@
 
 ## TODO *свои идеи*
 - [ ] Подумать
+
+## Дополнительно
+В конце работы нужно будет предоставить данные ввиде *Excel-таблицы*, но, так как заносить все данные в таблицу очень долго и скучно, я развлёк себя написанием [класса для создания *Excel-таблиц*](https://github.com/Eimaen/Informatics-Project-1/blob/main/TableRenderer.h).
+
+Пример использования `TableRenderer`:
+```
+ofstream fout("output.xls");
+
+TableRenderer renderer({ "Russian is not allowed", "Or is allowed, but I don't know how to encode" });
+renderer.addRow({ "TEST 1", "TEST 2" });
+renderer.addRow({ "TEST 3", "TEST 4" });
+renderer.write(fout);
+```
