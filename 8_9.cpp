@@ -170,6 +170,70 @@ string filterLetterTypes(string text, int type)
     return ret;
 }
 
+bool endsWith(string s, string ending) {
+    if (s.length() >= ending.length()) 
+        return (0 == s.compare(s.length() - ending.length(), ending.length(), ending));
+    else
+        return false;
+}
+
+enum chast_rechi
+{
+    CR_NONE,
+    CR_SUSCHESTVITELNOE,
+    CR_GLAGOL,
+    CR_PRILAGATELNOE
+};
+
+// Inaccurate word type detection
+int detectChastRechi(string word)
+{
+    vector<string> endingsPril = { "ее","ие","ые","ое","ими","ыми","ей","ий","ый","ой","ем","им","ым","ом","его",
+        "ого","ему","ому","их","ых","ую","юю","ая","яя","ою","ею" };
+    vector<string> endingsGlagol = { "ила","ыла","ена","ейте","уйте","ите","или","ыли","ей","уй","ил","ыл","им",
+        "ым","ен","ило","ыло","ено","ят","ует","уют","ит","ыт","ены","ить","ыть","ишь","ую","ю","ла","на","ете",
+        "йте","ли","й","л","ем","н","ло","ет","ют","ны","ть","ешь","нно" };
+    for (auto ending : endingsPril)
+        if (endsWith(word, ending))
+            return CR_PRILAGATELNOE;
+    for (auto ending : endingsGlagol)
+        if (endsWith(word, ending))
+            return CR_GLAGOL;
+    return CR_SUSCHESTVITELNOE;
+}
+
+struct chast_rechi_report
+{
+    int suschestvitelnoe = 0;
+    int glagol = 0;
+    int prilagatelnoe = 0;
+};
+
+// Generate chr report
+chast_rechi_report generateChastRechiReport(vector<string> ss)
+{
+    chast_rechi_report ret;
+    for (auto word : ss)
+    {
+        int cr = detectChastRechi(word);
+        switch (cr)
+        {
+        case CR_SUSCHESTVITELNOE:
+            ret.suschestvitelnoe++;
+            break;
+        case CR_PRILAGATELNOE:
+            ret.prilagatelnoe++;
+            break;
+        case CR_GLAGOL:
+            ret.glagol++;
+            break;
+        default:
+            break;
+        }
+    }
+    return ret;
+}
+
 // Application's entry point
 int main()
 {
@@ -226,6 +290,13 @@ int main()
 
     // Filter text
     cout << filterLetterTypes(text, CHAR_CONSONANT);
+
+    // Separate results
+    renderer.addRow({});
+    cout << "\nWord type statistics: \n";
+
+    auto report = generateChastRechiReport(ss);
+    cout << "Suschestvitel'nie: " << report.suschestvitelnoe << "\nPrilagatelnoe: " << report.prilagatelnoe << "\nGlagol: " << report.glagol;
 
     renderer.write(fout);
 }
