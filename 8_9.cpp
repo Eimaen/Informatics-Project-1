@@ -3,13 +3,86 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <locale>
+#include <codecvt>
 #include <algorithm>
+#include <Windows.h>
 
 using namespace std;
 
 string text;
 ifstream fin("input.txt");
-ifstream fout("output.txt");
+ofstream fout("output.xls");
+
+class TableRenderer
+{
+public:
+    void addRow(vector<string> row);
+    string render();
+    void write(ostream& stream);
+    TableRenderer();
+    ~TableRenderer();
+
+private:
+    vector<vector<string>> _table;
+    size_t _szTable;
+    size_t _szRowCount;
+};
+
+// Add row to the table
+void TableRenderer::addRow(vector<string> row)
+{
+    _table.push_back(row);
+    _szRowCount++;
+}
+
+// New versions of Excel warns, that this format is unsafe
+string TableRenderer::render()
+{
+    string excelTableData = "<?xml version=\"1.0\"?>\n";
+    excelTableData += "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" ";
+    excelTableData += "xmlns:o=\"urn:schemas-microsoft-com:office:office\" ";
+    excelTableData += "xmlns:x=\"urn:schemas-microsoft-com:office:excel\" ";
+    excelTableData += "xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" ";
+    excelTableData += "xmlns:html=\"http://www.w3.org/TR/REC-html40\">\n";
+    excelTableData += "  <Worksheet ss:Name=\"Data\">\n";
+    excelTableData += "    <Table ss:ExpandedColumnCount=\"";
+    excelTableData += to_string(_szRowCount);
+    excelTableData += "\" ss:ExpandedRowCount=\"";
+    excelTableData += to_string(_szRowCount);
+    excelTableData += "\" x:FullColumns=\"1\" x:FullRows=\"1\">\n";
+    for (vector<string> row : _table)
+    {
+        excelTableData += "      <Row>\n";
+        for (string value : row)
+        {
+            excelTableData += "        <Cell><Data ss:Type=\"String\">";
+            excelTableData += value;
+            excelTableData += "</Data></Cell>\n";
+        }
+        excelTableData += "      </Row>\n";
+    }
+    excelTableData += "    </Table>\n  </Worksheet>\n</Workbook>";
+    return excelTableData;
+}
+
+// Write contents to stream
+void TableRenderer::write(ostream& stream)
+{
+    // Russian is only supported when using UTF-8, convert it
+    // manually with Notepad++ or any other tool
+    stream << render();
+}
+
+TableRenderer::TableRenderer()
+{
+    _szRowCount = 0;
+}
+
+TableRenderer::~TableRenderer()
+{
+    _table.clear();
+}
 
 // Split string by words (separated by "divider")
 vector<string> split(string s, string divider)
@@ -84,6 +157,19 @@ vector<pair<string, string>> analyseWordLetters(vector<string> ss)
     return ret;
 }
 
+// Filter text, removing all char types except "type"
+string filterLetterTypes(string text, int type)
+{
+    string ret;
+    for (auto character : text)
+    {
+        int charType = getCharType(character);
+        if (charType == CHAR_SYMBOL || character == ' ' || charType == type)
+            ret += character;
+    }
+    return ret;
+}
+
 // Application's entry point
 int main()
 {
@@ -94,25 +180,52 @@ int main()
     // Split the text using spaces as separators
     vector<string> ss = split(text, " ");
 
+    TableRenderer renderer;
+
     cout << "Word ending analysis statistics: \n";
 
     // Word endings and beginnings analysis
+    renderer.addRow({ "Word 1", "Word 2" });
     vector<pair<string, string>> ar = analyseWordLetters(ss);
     if (ar.size() > 0)
-        for (int i = 0; i < ar.size(); i++)
-            cout << "Words \"" << ar[i].first << "\" and \"" << ar[i].second << "\" are near\n";
+        for (auto element : ar)
+        {
+            cout << "Words \"" << element.first << "\" and \"" << element.second << "\" are near\n";
+            renderer.addRow({ element.first, element.second });
+        }
     else
         cout << "No words matched pattern!\n";
 
     // Separate results
+    renderer.addRow({});
     cout << "\nWord appearance statistics: \n";
 
     // Count word repeats
+    renderer.addRow({ "Word", "Count" });
     map<string, int> ms = buildWordStatistics(ss);
     vector<pair<string, int>> mapRebuild = sortMapValues(ms);
     if (mapRebuild.size() > 0)
-        for (int i = 0; i < mapRebuild.size(); i++)
-            cout << mapRebuild[i].first << " is met " << mapRebuild[i].second << " times\n";
+        for (auto element : mapRebuild)
+        {
+            cout << element.first << " is met " << element.second << " times\n";
+            renderer.addRow({ element.first, to_string(element.second) });
+        }
     else
         cout << "No words met *lul*\n";
+
+    // Separate results
+    renderer.addRow({});
+    cout << "\nChar filter statistics (CHAR_VOWEL): \n";
+
+    // Filter text
+    cout << filterLetterTypes(text, CHAR_VOWEL);
+
+    // Separate results
+    renderer.addRow({});
+    cout << "\nChar filter statistics (CHAR_CONSONANT): \n";
+
+    // Filter text
+    cout << filterLetterTypes(text, CHAR_CONSONANT);
+
+    renderer.write(fout);
 }
