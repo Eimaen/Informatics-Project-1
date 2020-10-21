@@ -234,12 +234,26 @@ chast_rechi_report generateChastRechiReport(vector<string> ss)
     return ret;
 }
 
+// Convert string to lowercase
+void tolower(string &s)
+{
+    for (int i = 0; i < s.length(); i++)
+        s[i] = tolower(s[i]);
+}
+
 // Application's entry point
 int main()
 {
     // Set output codepage to Russian and read the text
     setlocale(LC_ALL, "Russian"); 
-    getline(fin, text); 
+    string readTempString;
+    while (!fin.eof())
+    {
+        getline(fin, readTempString);
+        text += readTempString + '\n';
+    }
+
+    tolower(text);
 
     // Split the text using spaces as separators
     vector<string> ss = split(text, " ");
@@ -286,14 +300,14 @@ int main()
 
     // Separate results
     renderer.addRow({});
-    cout << "\nChar filter statistics (CHAR_CONSONANT): \n";
+    cout << "\n\nChar filter statistics (CHAR_CONSONANT): \n";
 
     // Filter text
     cout << filterLetterTypes(text, CHAR_CONSONANT);
 
     // Separate results
     renderer.addRow({});
-    cout << "\nWord type statistics: \n";
+    cout << "\n\nWord type statistics: \n";
 
     auto report = generateChastRechiReport(ss);
     cout << "Suschestvitel'nie: " << report.suschestvitelnoe << "\nPrilagatelnoe: " << report.prilagatelnoe << "\nGlagol: " << report.glagol;
